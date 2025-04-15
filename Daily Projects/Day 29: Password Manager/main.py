@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 import random
 import pyperclip
+import json
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 def generate_password():
@@ -19,25 +20,52 @@ def generate_password():
     password = "".join(password_list)
     password_entry.insert(0, password)
     pyperclip.copy(password)
-    
+
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 def save():
     website = website_entry.get()
     email = email_entry.get()
     password = password_entry.get()
+    new_data = {website: {
+        "email": email,
+        "password": password
+        }
+    }
 
-    if len(website) == 0 or len(password) == 0 or len(email) == 0:
+    if len(website) == 0 or len(password) == 0:
         messagebox.showinfo(title="ERROR", message="Please make sure you haven't left any fields empty.")
 
     else:
-        is_ok = messagebox.askokcancel(title=website, message=f"These are the details entered: \nEmail: {email} "
-                                                      f"\nPassword: {password} \nIs it okay to save?")
+        try:
+            with open("data.json", "r") as data_file:
+                data = json.load(data_file)
+        except FileNotFoundError:
+            with open("data.json", "w"):
+                json.dump(data, data_file, indent=4)
+        else:
+            data.update(new_data)
 
-        if is_ok:
-            with open("data.txt", "a") as data_file:
-                data_file.write(f"{website} | {email} | {password}\n")
-                website_entry.delete(0,END)
-                password_entry.delete(0,END)
+            with open("data.json", "w") as data_file:
+                json.dump(data, data_file, indent=4)
+        finally:
+            website_entry.delete(0,END)
+            password_entry.delete(0,END)
+# ---------------------------- SEARCH WEBSITE ------------------------------- #
+def search_website():
+    website = website_entry.get()
+    try:
+        with open("data.json") as data_file:
+            data = json.load(data_file)
+    except FileNotFoundError:
+        messagebox.showinfo(title="ERROR", message="No Data File found")
+    else:
+        if website in data:
+            email = data[website]["email"]
+            password = data[website]["password"]
+            messagebox.showinfo(title=website, message=f"Email: {email} \nPassword: {password}")
+        else:
+            messagebox.showinfo(title="ERROR", message=f"No account details for {website} found.")
+
 # ---------------------------- UI SETUP ------------------------------- #
 
 window = Tk()
@@ -58,8 +86,8 @@ email_label.grid(column=0, row=2)
 password_label = Label(text="Password:")
 password_label.grid(column=0, row=3)
 
-website_entry = Entry(width=35)
-website_entry.grid(column=1, row=1, columnspan=2)
+website_entry = Entry(width=18)
+website_entry.grid(column=1, row=1)
 
 email_entry = Entry(width=35)
 email_entry.insert(0, "joana@email.com")
@@ -73,5 +101,8 @@ generate_button.grid(column=2, row=3)
 
 add_button = Button(text="Add", width=36, command=save)
 add_button.grid(column=1, row=4, columnspan=2)
+
+search_button = Button(text="Search", width=13, command=search_website)
+search_button.grid(column=2, row=1)
 
 window.mainloop()
