@@ -58,7 +58,7 @@ if percentage_diff > 5:
         message = client.messages.create(
             from_='whatsapp:+14155238886',
             body=f"{STOCK_NAME}: {up_down}{round(percentage_diff)}% \n{article}",
-            to='whatsapp:+37066146888'  # insert your whatsapp phone number here
+            to='whatsapp:[PHONE NUMBER]'  # insert your whatsapp phone number here
         )
 
 
