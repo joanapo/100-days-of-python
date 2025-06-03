@@ -1,5 +1,3 @@
-import os.path
-
 import requests
 from bs4 import BeautifulSoup
 
@@ -13,9 +11,6 @@ soup = BeautifulSoup(article, "html.parser")
 
 names = [movie.getText() for movie in soup.find_all(name="h3", class_="title")]
 names.reverse() # reverse the list from 1-100
-
-if not os.path.isfile(FILENAME):
-    new_file = open(FILENAME, "x")
 
 with open(FILENAME, "w") as file:
     for name in names:
